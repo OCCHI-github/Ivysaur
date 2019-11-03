@@ -9,11 +9,11 @@ import android.widget.ListView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.example.ivysaur.utils.RealmUtils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,33 +27,34 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mListView = (ListView) findViewById(R.id.listView);
+        mListView = findViewById(R.id.listView);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+            public void onClick(View v) {
+                Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
 
         Realm.init(getApplicationContext());
-        Realm realm = RealmUtils.getRealmInstance();
+        RealmConfiguration realmConfig = new RealmConfiguration.Builder().build();
+        Realm realm = Realm.getInstance(realmConfig);
 
         RealmResults<Task> tasks = realm.where(Task.class).findAll();
-        TaskAdapter adapter = new TaskAdapter(this, tasks);
+        TaskAdapter adapter = new TaskAdapter(tasks);
         mListView.setAdapter(adapter);
 
-        // ボタンクリック時の処理
+        // 新規タスク追加
         findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // activity の遷移 (main -> taskEdit)
                 startActivity(new Intent(MainActivity.this, TaskEditActivity.class));
             }
         });
 
+        // 既存タスク編集
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

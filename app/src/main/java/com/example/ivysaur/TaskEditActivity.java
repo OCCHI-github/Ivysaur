@@ -9,9 +9,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ivysaur.utils.DateUtils;
-import com.example.ivysaur.utils.RealmUtils;
 
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 
 public class TaskEditActivity extends AppCompatActivity {
@@ -24,21 +24,24 @@ public class TaskEditActivity extends AppCompatActivity {
 
     Button mDelete;
 
+    private Realm realm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_edit);
 
-        mDeadlineEdit = (EditText) findViewById(R.id.deadlineEditView);
-        mTitleEdit = (EditText) findViewById(R.id.titleEditView);
-        mDetailEdit = (EditText) findViewById(R.id.taskDetailEditView);
-        mDelete = (Button) findViewById(R.id.delete);
+        mDeadlineEdit = findViewById(R.id.deadlineEditView);
+        mTitleEdit = findViewById(R.id.titleEditView);
+        mDetailEdit = findViewById(R.id.taskDetailEditView);
+        mDelete = findViewById(R.id.delete);
+
+        Realm.init(getApplicationContext());
+        RealmConfiguration realmConfig = new RealmConfiguration.Builder().build();
+        realm = Realm.getInstance(realmConfig);
 
         long taskId = getIntent().getLongExtra("task_id", -1);
         if (taskId != -1) {
-            Realm.init(getApplicationContext());
-            Realm realm = RealmUtils.getRealmInstance();
-
             RealmResults<Task> results = realm.where(Task.class).equalTo("id", taskId).findAll();
             Task task = results.first();
             mDeadlineEdit.setText(DateUtils.toStringDate(task.getDeadLine()));
@@ -51,10 +54,6 @@ public class TaskEditActivity extends AppCompatActivity {
     }
 
     public void onSaveTapped(View view) {
-
-        Realm.init(getApplicationContext());
-        Realm realm = RealmUtils.getRealmInstance();
-
         long taskId = getIntent().getLongExtra("task_id", -1);
         Task task;
         realm.beginTransaction();
@@ -73,46 +72,9 @@ public class TaskEditActivity extends AppCompatActivity {
 
         Toast.makeText(this, "保存しました", Toast.LENGTH_SHORT).show();
         finish();
-
-//        if (taskId != -1) {
-//            RealmResults<Task> results = realm.where(Task.class).equalTo("id", taskId).findAll();
-//            realm.beginTransaction();
-//            Task task = results.first();
-//            task.setDeadLine(DateUtils.toDate(mDeadlineEdit));
-//            task.setTitle(mTitleEdit.getText().toString());
-//            task.setDetail(mDetailEdit.getText().toString());
-//            realm.commitTransaction();
-//
-//            Snackbar.make(findViewById(android.R.id.content), "更新しました", Snackbar.LENGTH_SHORT)
-//                    .setAction("戻る", new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                            finish();
-//                        }
-//                    })
-//                    .setActionTextColor(Color.YELLOW)
-//                    .show();
-//            startActivity(new Intent(TaskEditActivity.this, MainActivity.class));
-//        } else {
-//
-//            // トランズアクション宣言
-//            realm.beginTransaction();
-//            Number maxId = realm.where(Task.class).max("id");
-//            long nextId = maxId != null ? maxId.longValue() + 1 : 1;
-//            Task task = realm.createObject(Task.class, nextId);
-//            task.setDeadLine(DateUtils.toDate(mDeadlineEdit));
-//            task.setTitle(mTitleEdit.getText().toString());
-//            task.setDetail(mDetailEdit.getText().toString());
-//            realm.commitTransaction();
-//
-//            Toast.makeText(this, "保存しました", Toast.LENGTH_SHORT).show();
-//            finish();
-//        }
     }
 
     public void onDeleteTapped(View view) {
-        Realm.init(getApplicationContext());
-        Realm realm = RealmUtils.getRealmInstance();
         long taskId = getIntent().getLongExtra("task_id", -1);
         if (taskId != -1) {
             RealmResults<Task> results = realm.where(Task.class).equalTo("id", taskId).findAll();
