@@ -1,14 +1,19 @@
 package com.example.ivysaur;
 
+import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ivysaur.utils.DateUtils;
+
+import java.util.Calendar;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -51,6 +56,21 @@ public class TaskEditActivity extends AppCompatActivity {
         } else {
             mDelete.setVisibility(View.INVISIBLE);
         }
+
+        mDeadlineEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Calendar calendar = Calendar.getInstance();
+                DatePickerDialog datePickerDialog = new DatePickerDialog(TaskEditActivity.this, new DatePickerDialog.OnDateSetListener() {
+                    @SuppressLint("DefaultLocale")
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        mDeadlineEdit.setText(String.format("%d/%02d/%02d", year, month + 1, dayOfMonth));
+                    }
+                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE));
+                datePickerDialog.show();
+            }
+        });
     }
 
     public void onSaveTapped(View view) {
